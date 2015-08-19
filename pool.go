@@ -36,7 +36,7 @@ func NewPool(fish Fish, size ...int) *Pool {
 	}
 }
 
-// 并发安全地获取一个连接
+// 并发安全地获取一个资源
 func (self *Pool) GetOne() Fish {
 	self.Mutex.Lock()
 	defer self.Mutex.Unlock()
@@ -65,7 +65,7 @@ func (self *Pool) Free(m ...Fish) {
 	}
 }
 
-// 关闭并删除指定连接
+// 关闭并删除指定资源
 func (self *Pool) Remove(m ...Fish) {
 	for _, c := range m {
 		c.Close()
@@ -81,7 +81,7 @@ func (self *Pool) Reset() {
 	}
 }
 
-// 根据情况自动动态增加连接
+// 根据情况自动动态增加资源
 func (self *Pool) increment() {
 	if len(self.Src) < self.Cap {
 		self.Src[self.Fish.New()] = false
