@@ -53,7 +53,7 @@ func (self *mgoFish) Usable() bool {
 	return true
 }
 
-// 自毁方法，在被资源池删除时调用
+// 自毁方法，在被对象池删除时调用
 func (self *mgoFish) Close() {
 	self.Session.Close()
 }
