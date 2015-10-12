@@ -101,7 +101,5 @@ func (self *Pool) Reset() {
 
 // 根据情况自动动态增加对象
 func (self *Pool) increment() {
-	if len(self.Src) < self.Cap {
-		self.Src[self.Fish.New()] = false
-	}
+	self.Src[self.Fish.New()] = false
 }
