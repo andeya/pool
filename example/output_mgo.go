@@ -30,35 +30,35 @@ var MGO_OUTPUT = &MgoOutput{
 }
 
 /************************ MongoDB 输出 ***************************/
-var mgoPool = pool.NewPool(new(mgoFish), 1024)
+var mgoPool = pool.NewPool(new(mgoSrc), 1024)
 
-type mgoFish struct {
+type mgoSrc struct {
 	*mgo.Session
 }
 
-func (self *mgoFish) New() pool.Fish {
+func (self *mgoSrc) New() pool.Src {
 	mgoSession, err := mgo.Dial(MGO_OUTPUT.Host)
 	if err != nil {
 		panic(err)
 	}
 	mgoSession.SetMode(mgo.Monotonic, true)
-	return &mgoFish{Session: mgoSession}
+	return &mgoSrc{Session: mgoSession}
 }
 
-// 判断连接有效性
-func (self *mgoFish) Usable() bool {
+// 判断连接是否失效
+func (self *mgoSrc) Expired() bool {
 	if self.Session.Ping() != nil {
-		return false
+		return true
 	}
-	return true
+	return false
 }
 
 // 自毁方法，在被对象池删除时调用
-func (self *mgoFish) Close() {
+func (self *mgoSrc) Close() {
 	self.Session.Close()
 }
 
-func (*mgoFish) Clean() {}
+func (*mgoSrc) Clean() {}
 
 // 每个爬取任务的数据容器
 type Collector struct {
@@ -76,7 +76,7 @@ type DataCell struct {
 func Output(self *Collector, dataIndex int) {
 	var err error
 	//连接数据库
-	mgoSession := mgoPool.GetOne().(*mgoFish)
+	mgoSession := mgoPool.GetOne().(*mgoSrc)
 	defer mgoPool.Free(mgoSession)
 
 	dbname, tabname := dbOrTabName(self)
