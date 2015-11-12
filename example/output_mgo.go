@@ -39,7 +39,7 @@ type mgoSrc struct {
 func (self *mgoSrc) New() pool.Src {
 	mgoSession, err := mgo.Dial(MGO_OUTPUT.Host)
 	if err != nil {
-		panic(err)
+		return nil
 	}
 	mgoSession.SetMode(mgo.Monotonic, true)
 	return &mgoSrc{Session: mgoSession}
@@ -47,7 +47,7 @@ func (self *mgoSrc) New() pool.Src {
 
 // 判断连接是否失效
 func (self *mgoSrc) Expired() bool {
-	if self.Session.Ping() != nil {
+	if self.Session == nil || self.Session.Ping() != nil {
 		return true
 	}
 	return false
@@ -55,6 +55,9 @@ func (self *mgoSrc) Expired() bool {
 
 // 自毁方法，在被对象池删除时调用
 func (self *mgoSrc) Close() {
+	if self.Session == nil {
+		return
+	}
 	self.Session.Close()
 }
 
